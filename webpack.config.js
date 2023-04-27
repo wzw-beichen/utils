@@ -1,8 +1,10 @@
 const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
+const [mode, modeType] = process.argv.slice(2);
+
 module.exports = {
-    mode: 'production',
+    mode: modeType,
     // 入口
     entry: './src/index.ts',
     // 出口

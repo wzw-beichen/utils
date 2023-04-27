@@ -7,7 +7,11 @@
     "build": "webpack --mode development",
     "build production": "webpack --mode production"
   },
-  "author": "zwei",
+  "author": {
+    "name": "zwei",
+    "email": "277319623@qq.com"
+  },
+  "homepage": "https://github.com/wzw-beichen/utils",
   "license": "ISC",
   "devDependencies": {
     "clean-webpack-plugin": "^4.0.0",
