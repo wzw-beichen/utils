@@ -20,6 +20,8 @@
 描述：遍历 collection（集合）元素，返回 predicate（断言函数）最后一个返回真值的元素。
 #### 9.toArray 
 描述：转换成数组
+#### 10.imgArrayTransformString 
+描述：常用图片数组转换成字符串  
 ## Enum
 #### 1.enumTransformArray
 描述：枚举转数组
@@ -35,6 +37,8 @@
 ## String
 #### 1.getSearchParams
 描述：获取url searchParams数据
+#### 2.stringTransformImgArr
+描述：字符串转换成图片数组
 ## element
 #### 1.errorScrollIntoView
 描述：form验证错误滚动到第一个
