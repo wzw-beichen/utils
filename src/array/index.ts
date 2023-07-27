@@ -266,3 +266,123 @@ export const imgArrayTransformString = (
     .filter(Boolean)
     .join(separator);
 };
+
+/**
+ * @description 根据targetId获取树形数组里面的某一项
+ * @params array 树形结构数组
+ * @params targetId 目标id
+ * @params fieldNames 自定义树形结构中label、value、children的字段
+ * @example data = [
+ *  { id: 6, label: 6, children: [{ id: 600, label: 600,children: [{ id: 60000, label: 6000 }]}]},
+ *  { id: 7, label: 7, children: [{ id: 700, label: 700,children: [{ id: 70000, label: 70000 }]}]},
+ *  { id: 8, label: 8, children: [{ id: 800, label: 800,children: [{ id: 80000, label: 80000 }]}]},
+ *  { id: 9, label: 9, children: [{ id: 900, label: 900,children: [{ id: 90000, label: 90000 }]}]},
+ *  { id: 10, label: 10, children: [{ id: 1000, label: 1000,children: [{ id: 100000, label: 100000 }]}]},
+ * ]
+ * pickTreeArray(data, 8) ===> [{ id: 8, label: 8, children: [{ id: 800, label: 800,children: [{ id: 80000, label: 80000 }]}]}]
+ * pickTreeArray(data, 900) ===> [{ id: 9, label: 9, children: [{ id: 900, label: 900,children: [{ id: 90000, label: 90000 }]}]}]
+ * pickTreeArray(data, 100000) ===> [{ id: 10, label: 10, children: [{ id: 1000, label: 1000,children: [{ id: 100000, label: 100000 }]}]}]
+ */
+export const pickTreeArray = <T>(
+  array: T[],
+  targetId?: number | string,
+  fieldNames?: {
+    value: string;
+    children: string;
+  }
+) => {
+  const { value: valueKey = "id", children: childrenKey = "children" } =
+    fieldNames || {};
+  return array.filter((item) => {
+    const children = item[childrenKey];
+    const value = item[valueKey];
+    if (value === targetId) {
+      return true;
+    }
+    if (children?.length) {
+      return pickTreeArray(children, targetId, fieldNames).length;
+    }
+  });
+};
+
+/**
+ * @description 根据targetId获取树形数组某一层级，铺平获取到的层级数据
+ * @params array 树形结构数组
+ * @params targetId 目标id
+ * @params fieldNames 自定义树形结构中label、value、children的字段
+ * @example data = [{ id: 8, label: 8, children: [{ id: 800, label: 800,children: [{ id: 80000, label: 80000 }]}]}]
+ * pickTreeArray(data, 8) ===> [{ id: 8, label: 8 }]
+ * pickTreeArray(data, 800) ===> [{ id: 8, label: 8 }, { id: 800, label: 800 }]
+ * pickTreeArray(data, 80000) ===> [{ id: 8, label: 8 }, { id: 800, label: 800 }, { id: 80000, label: 80000 }]
+ */
+export const pickLevelTreeArray = <T>(
+  array: T[],
+  targetId?: number | string,
+  fieldNames?: {
+    label: string;
+    value: string;
+    children: string;
+  }
+) => {
+  const {
+    value: valueKey = "id",
+    label: labelKey = "name",
+    children: childrenKey = "children",
+  } = fieldNames || {};
+  return array.reduce((total, item) => {
+    const children = item[childrenKey];
+    const value = item[valueKey];
+    const label = item[labelKey];
+    const newItem = {
+      [labelKey]: label,
+      [valueKey]: value,
+    };
+    if (value === targetId) {
+      return [...total, newItem];
+    }
+    if (children) {
+      const pickArr = pickLevelTreeArray(children, targetId, fieldNames);
+      return [...total, ...(pickArr.length ? [newItem, ...pickArr] : [])];
+    }
+    return total;
+  }, []);
+};
+
+/**
+ * @description 根据targetId获取树形数组的某一项，铺平获取到的某一项数据
+ * @params array 树形结构数组
+ * @params targetId 目标id
+ * @params fieldNames 自定义树形结构中label、value、children的字段
+ * @example data = [
+ *  { id: 6, label: 6, children: [{ id: 600, label: 600,children: [{ id: 60000, label: 6000 }]}]},
+ *  { id: 7, label: 7, children: [{ id: 700, label: 700,children: [{ id: 70000, label: 70000 }]}]},
+ *  { id: 8, label: 8, children: [{ id: 800, label: 800,children: [{ id: 80000, label: 80000 }]}]},
+ *  { id: 9, label: 9, children: [{ id: 900, label: 900,children: [{ id: 90000, label: 90000 }]}]},
+ *  { id: 10, label: 10, children: [{ id: 1000, label: 1000,children: [{ id: 100000, label: 100000 }]}]},
+ * ]
+ * pickTreeArray(data, 8) ===> [{ id: 8, label: 8 }]
+ * pickTreeArray(data, 800) ===> [{ id: 8, label: 8 }, { id: 800, label: 800 }]
+ * pickTreeArray(data, 80000) ===> [{ id: 8, label: 8 }, { id: 800, label: 800 }, { id: 80000, label: 80000 }]
+ */
+export const pickLabelValueTreeArray = <T>(
+  array: T[],
+  targetId?: number | string,
+  fieldNames?: {
+    label: string;
+    value: string;
+    children: string;
+  }
+) => {
+  const {
+    value: valueKey = "id",
+    label: labelKey = "name",
+    children: childrenKey = "children",
+  } = fieldNames || {};
+  const newFieldNames = {
+    value: valueKey,
+    label: labelKey,
+    children: childrenKey,
+  };
+  const treeArray = pickTreeArray(array, targetId, newFieldNames);
+  return pickLevelTreeArray(treeArray, targetId, newFieldNames);
+};
