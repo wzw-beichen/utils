@@ -1,6 +1,6 @@
 {
   "name": "c-fn-utils",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "common fn utils",
   "main": "./dist/utils.js",
   "scripts": {
