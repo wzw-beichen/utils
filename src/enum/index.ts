@@ -6,8 +6,7 @@ type CommonRecord = Record<string, any>;
  * @param data 处理成相应的格式 默认label,value
  * @returns 对应格式的数组
  * 需要特别注意点 假如枚举的值为number类型，枚举有顺序，转换出来的数组始终根据value大小进行排序。
- * SuitEnum {'是' = 1, '否' = 0 }  ==> 转换出来 [{ label: '否', value: 0 }, {label = '是', value = 1 }]
-}
+ * SuitEnum {'是' = 1, '否' = 0 }  ==> 转换出来 [{ label: '否', value: 0 }, {label: '是', value: 1 }]
  * @example enum SuitEnum { '非套装','套装' } ==> [{ label: '非套装', value: 0 }, { label: '套装', value: 1 }]
  */
 export const enumTransformArray = <
