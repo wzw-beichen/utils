@@ -136,7 +136,8 @@ export const arraySortKey = <T extends Record<string, any>>(
 export const pickArrayItem = <T>(
   array: T[],
   pickIndex: number = array.length - 1
-) => {
+): T => {
+  if (!array?.length) return array as undefined | null;
   const arrLength = array.length;
   const lastIndex = arrLength - 1;
   const numIndex = Math.abs(pickIndex);
@@ -188,7 +189,7 @@ export const arrayChunk = <T>(array: T[], size = 1): T[][] => {
 export const arrayCountBy = <T extends any>(
   collection: Array<T> | Object,
   iteratee?: Function | string
-) => {
+): Record<string, number> => {
   const newCollection = collection as Array<T>;
   const total: Record<string, number> = {};
   for (let item of newCollection) {
@@ -290,7 +291,7 @@ export const pickTreeArray = <T>(
     value?: string;
     children?: string;
   }
-) => {
+): T[] => {
   const { value: valueKey = "id", children: childrenKey = "children" } =
     fieldNames || {};
   return array.filter((item) => {
@@ -323,7 +324,7 @@ export const pickLevelTreeArray = <T>(
     value?: string;
     children?: string;
   }
-) => {
+): T[] => {
   const {
     value: valueKey = "id",
     label: labelKey = "name",
@@ -372,7 +373,7 @@ export const pickLabelValueTreeArray = <T>(
     value?: string;
     children?: string;
   }
-) => {
+): T[] => {
   const {
     value: valueKey = "id",
     label: labelKey = "name",
