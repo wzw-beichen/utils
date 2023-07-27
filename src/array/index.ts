@@ -287,8 +287,8 @@ export const pickTreeArray = <T>(
   array: T[],
   targetId?: number | string,
   fieldNames?: {
-    value: string;
-    children: string;
+    value?: string;
+    children?: string;
   }
 ) => {
   const { value: valueKey = "id", children: childrenKey = "children" } =
@@ -319,9 +319,9 @@ export const pickLevelTreeArray = <T>(
   array: T[],
   targetId?: number | string,
   fieldNames?: {
-    label: string;
-    value: string;
-    children: string;
+    label?: string;
+    value?: string;
+    children?: string;
   }
 ) => {
   const {
@@ -368,9 +368,9 @@ export const pickLabelValueTreeArray = <T>(
   array: T[],
   targetId?: number | string,
   fieldNames?: {
-    label: string;
-    value: string;
-    children: string;
+    label?: string;
+    value?: string;
+    children?: string;
   }
 ) => {
   const {
