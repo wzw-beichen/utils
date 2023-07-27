@@ -137,8 +137,8 @@ export const pickArrayItem = <T>(
   array: T[],
   pickIndex: number = array.length - 1
 ): T => {
-  if (!array?.length) return array as undefined | null;
-  const arrLength = array.length;
+  const newArray = Array.isArray(array) ? array : [];
+  const arrLength = newArray.length;
   const lastIndex = arrLength - 1;
   const numIndex = Math.abs(pickIndex);
   if (pickIndex < 0) {
