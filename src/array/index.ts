@@ -133,19 +133,18 @@ export const arraySortKey = <T extends Record<string, any>>(
  *          pickArrayItem(data, -5) ===> 1
  *          pickArrayItem(data, -6) ===> 1
  */
-export const pickArrayItem = <T>(
-  array: T[],
-  pickIndex: number = array.length - 1
-): T => {
+export const pickArrayItem = <T>(array: T[], pickIndex?: number): T => {
   const newArray = Array.isArray(array) ? array : [];
   const arrLength = newArray.length;
+  if (!arrLength) return undefined;
+  const newIndex = pickIndex ?? arrLength - 1;
   const lastIndex = arrLength - 1;
-  const numIndex = Math.abs(pickIndex);
-  if (pickIndex < 0) {
+  const numIndex = Math.abs(newIndex);
+  if (newIndex < 0) {
     if (numIndex > arrLength) {
       return array[0];
     }
-    return array[arrLength + pickIndex];
+    return array[arrLength + newIndex];
   }
   const minIndex = Math.min(numIndex, lastIndex);
   return array[minIndex];
