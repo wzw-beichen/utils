@@ -293,6 +293,84 @@ pickLabelValueTreeArray(data, 80000) ===> [
 ];
 ```  
 
+#### 14.arrayCombination
+描述：数组根据对应某个key进行组合
+```
+const data = [{ uuid: "xxx1", id: 1, name: 111 }, { uuid: "xxx2", id: 1, name: 222 }, { uuid: "xxx3", id: 2, name: 333 }];
+arrayCombination(data, { key: "id" }) ===> {
+  1: [{ uuid: "xxx1", id: 1, name: 111 }, { uuid: "xxx2", id: 1, name: 222 }],
+  2: [{ uuid: "xxx3", id: 2, name: 333 }]
+}
+arrayCombination(data, { key: "id", returnArray: true }) ===>  [
+  ["1", [{ uuid: "xxx1", id: 1, name: 111 }, { uuid: "xxx2", id: 1, name: 222 }]],
+  ["2", [{ uuid: "xxx3", id: 2, name: 333 }]
+]
+```  
+#### 15.differenceBy
+描述：取两个数组分别对应的交集、并集
+```
+const data = [
+  { label: 1, value: 1 },
+  { label: 2, value: 2 },
+  { label: 3, value: 3 },
+  { label: 4, value: 4 },
+  { label: 5, value: 5 },
+];
+differenceBy(data, [1, 2], item => item.value) ===> [
+  [3, 4, 5],
+  [1, 2]
+]
+```  
+#### 16.arrayIntersectionAndUnion
+描述：取两个数组分别对应的交集、并集
+```
+const initParams = [
+  { label: 1, value: 1 },
+  { label: 2, value: 2 },
+  { label: 3, value: 3 },
+  { label: 4, value: 4 },
+  { label: 5, value: 5 },
+];
+const formData = [
+  { label: 1, value: 1 },
+  { label: 6, value: 6 },
+  { label: 7, value: 7 },
+  { label: 8, value: 8 },
+  { label: 9, value: 9 },
+  { label: 10, value: 10 },
+];
+arrayIntersectionAndUnion(formData, initParams, (item) => item.value) ===> [
+  [6, 7, 8, 9, 10],
+  [2, 3, 4, 5]
+  [1],
+]
+```
+#### 17.arrayFilterMap
+描述：取两个数组分别对应的交集、并集
+```
+const data = [{ id: 1, name: 1 }, { id: 2, name: 2 }, { id: 3, name: 3 }, { id: 4, name: 4 }, { id: 5, name: 5 }];
+arrayFilterMap(data, [{ key: "id", value: 1 }], { id: "value", name: 'label' }) ===> 
+[{ value: 1, label: 1 }]
+
+arrayFilterMap(data, [{ key: "id", value: 1, equalType: "unEqual" }], { id: 'value', name: 'label' }) ===> 
+[{ value: 2, label: 2 }, { value: 3, label: 3 }, { value: 4, label: 4 }, { value: 5, label: 5 }]
+
+arrayFilterMap(data, [{ key: "id", value: 1 }, { key: "name", value: 2, filterType: 'or' }], { id: 'value', name: 'label' }) ===> 
+[{ value: 1, label: 1 }, { value: 2, label: 2 }]
+
+arrayFilterMap(data, [{ key: "id", value: 1, equalType: "unEqual" }, { key: "name", value: 1, filterType: 'or' }], { id: 'value', name: 'label' }) ===>
+[{ value: 1, label: 1 }, { value: 2, label: 2 }, { value: 3, label: 3 }, { value: 4, label: 4 }, { value: 5, label: 5 }]
+
+arrayFilterMap(data, [{ value: (item) => item.name === 2 }], { id: 'value', name: 'label' }) ===>
+[{ value: 2, label: 2 }]
+
+arrayFilterMap(data, [{ value: (item) => item.name === 2 }], { name: (item) => `${item.id}/${item.name}`, id: 'value' }) ===>
+[{ name: '2/2', value: 2 }]
+
+arrayFilterMap(data, [], { name: (item) => `${item.id}/${item.name}`, id: 'value' }) ===>
+[{ name: '1/1', value: 1 }, { name: '2/2', value: 2 }, { name: '3/3', value: 3 }, { name: '4/4', value: 4 }, { name: '5/5', value: 5 }]
+```
+
 ## Enum
 #### 1.enumTransformArray
 描述：枚举转数组
@@ -355,6 +433,22 @@ stringTransformImgArr(data) ===> [
   { url: "https://1.png", uid: "xxx1", status: "done" },
   { url: "https://2.png", uid: "xxx2", status: "done" },
 ];
+```
+
+## Number
+#### 1.numberFixed
+描述：四舍五入 默认保留1位小数
+```
+ 当前已考虑以下情况
+ 1、纯整数
+ 2、小数，小数位不够或者刚好够保留位数
+ 3、小数，小数位超过保留位数，超过10往前进1，
+ toFixed四舍五入不准确
+ (0.45).toFixed(1) ===> 0.4
+ (3.55).toFixed(1) ===> 3.5
+
+ numberFixed(0.45) ===> 0.5
+ numberFixed(3.55) ===> 3.5
 ```
 
 ## element

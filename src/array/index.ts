@@ -1,4 +1,5 @@
 import { omitObjectSomeKeys } from "../object";
+import { isFunction } from "../utils";
 
 /**
  * @description 数组位置对换
@@ -385,4 +386,207 @@ export const pickLabelValueTreeArray = <T>(
   };
   const treeArray = pickTreeArray(array, targetId, newFieldNames);
   return pickLevelTreeArray(treeArray, targetId, newFieldNames);
+};
+
+/**
+ * @description 数组根据对应某个key进行组合
+ * @params array 需要组合的array
+ * @params config { key: string; returnArray?: boolean;dealItem?: (item: T) => Record<string, any>; }
+ * @example const data = [{ uuid: "xxx1", id: 1, name: 111 }, { uuid: "xxx2", id: 1, name: 222 }, { uuid: "xxx3", id: 2, name: 333 }];
+ * arrayCombination(data, { key: "id" }) ===> { 1: [{ uuid: "xxx1", id: 1, name: 111 }, { uuid: "xxx2", id: 1, name: 222 }], 2: [ { uuid: "xxx3", id: 2, name: 333 }] }
+ * arrayCombination(data, { key: "id", returnArray: true }) ===>  [["1", [{ uuid: "xxx1", id: 1, name: 111 }, { uuid: "xxx2", id: 1, name: 222 }]], ["2", [{ uuid: "xxx3", id: 2, name: 333 }]]]
+ */
+export const arrayCombination = <T extends Record<string, any>>(
+  array: T[],
+  config: {
+    key: string;
+    returnArray?: boolean;
+    dealItem?: (item: T) => string | number;
+  }
+) => {
+  const { key, returnArray, dealItem } = config;
+  const allValues = array.reduce((total, item) => {
+    const combinationKey = item[key];
+    const newItem = dealItem ? dealItem(item) : item;
+    if (!total[combinationKey]) {
+      total[combinationKey] = [newItem];
+    } else {
+      total[combinationKey].push(newItem);
+    }
+    return total;
+  }, {} as Record<string, any[]>);
+  if (returnArray) {
+    const values = Object.entries(allValues);
+    return values;
+  }
+  return allValues;
+};
+
+/**
+ * @description 取两个数组分别对应的交集、并集
+ * @param array 
+ * @param targetArray 
+ * @param func 
+ * @returns  [addList, sameList]
+ * @example const data = [
+    { label: 1, value: 1 },
+    { label: 2, value: 2 },
+    { label: 3, value: 3 },
+    { label: 4, value: 4 },
+    { label: 5, value: 5 },
+  ];
+  differenceBy(data, [1, 2], item => item.value) ===> [
+    [3, 4, 5],
+    [1, 2]
+  ]
+ */
+export const differenceBy = <
+  T extends Record<string, any>,
+  U extends string | number = string
+>(
+  array: T[],
+  targetArray: U[],
+  func?: (item: T) => U
+): [U[], U[]] => {
+  const [diffArray, sameArray] = array.reduce(
+    (total, item) => {
+      const newItem = func ? func(item) : (item as unknown as U);
+      let newIndex = 0;
+      if (targetArray.includes(newItem)) {
+        newIndex = 1;
+      }
+      total[newIndex].push(newItem);
+      return total;
+    },
+    [[], []] as [U[], U[]]
+  );
+  return [diffArray, sameArray];
+};
+
+/**
+ * @description 取两个数组分别对应的交集、并集
+ * @return [addList, delList，sameList]
+ * @example 
+ * const initParams = [
+    { label: 1, value: 1 },
+    { label: 2, value: 2 },
+    { label: 3, value: 3 },
+    { label: 4, value: 4 },
+    { label: 5, value: 5 },
+  ];
+  const formData = [
+    { label: 1, value: 1 },
+    { label: 6, value: 6 },
+    { label: 7, value: 7 },
+    { label: 8, value: 8 },
+    { label: 9, value: 9 },
+    { label: 10, value: 10 },
+  ];
+  arrayIntersectionAndUnion(formData, initParams, (item) => item.value) ===> [
+    [6, 7, 8, 9, 10],
+    [2, 3, 4, 5]
+    [1],
+  ]
+ */
+export const arrayIntersectionAndUnion = <T extends Record<string, any>>(
+  array: T[],
+  targetArray: T[],
+  /** type 0源数组 1目标数组 */
+  func?: (item: T, type: number, index: number) => string | number,
+  index: number = 0
+) => {
+  const targetKeys = targetArray.map((item) =>
+    func ? func(item, 1, index) : item
+  ) as (string | number)[];
+  const sourceKeys = array.map((item) =>
+    func ? func(item, 0, index) : item
+  ) as (string | number)[];
+  const [sourceDiffArray, sameArray] = differenceBy(
+    array,
+    targetKeys,
+    (item) => {
+      return func ? func(item, 0, index) : (item as unknown as string | number);
+    }
+  );
+  const [targetDiffArray] = differenceBy(targetArray, sourceKeys, (item) => {
+    return func ? func(item, 1, index) : (item as unknown as string | number);
+  });
+  return [sourceDiffArray, targetDiffArray, sameArray];
+};
+
+/**
+ * @description 数组map、filter结合
+ * @param array 数组
+ * @param filter string | string[] | (item: T) => boolean
+ * @param map string | ((item: T) => any)
+ * @return 筛选后映射的数组
+ * @example const data = [{id: 1, name: 1 }, {id: 2, name: 2 }, {id: 3, name: 3 }, {id: 4, name: 4 }, {id: 5, name: 5 }]
+ *          arrayFilterMap(data, [{key: "id", value: 1 }], {id: "value", name: 'label' }) ===>
+ *          [{value: 1, label: 1 }]
+ *          arrayFilterMap(data, [{key: "id", value: 1, equalType: "unEqual" }], {id: 'value', name: 'label' }) ===>
+ *          [{value: 2, label: 2 }, {value: 3, label: 3 }, {value: 4, label: 4 }, {value: 5, label: 5 }]
+ *          arrayFilterMap(data, [{key: "id", value: 1 }, {key: "name", value: 2, filterType: 'or' }], {id: 'value', name: 'label' }) ===>
+ *          [{value: 1, label: 1 }, {value: 2, label: 2 }]
+ *          arrayFilterMap(data, [{key: "id", value: 1, equalType: "unEqual" }, {key: "name", value: 1, filterType: 'or' }], {id: 'value', name: 'label' }) ===>
+ *          [{value: 1, label: 1 }, {value: 2, label: 2 }, {value: 3, label: 3 }, {value: 4, label: 4 }, {value: 5, label: 5 }]
+ *          arrayFilterMap(data, [{value: (item) => item.name === 2 }], {id: 'value', name: 'label' }) ===>
+ *          [{value: 2, label: 2 }]
+ *          arrayFilterMap(data, [{value: (item) => item.name === 2 }], {name: (item) => `${item.id}/${item.name}`, id: 'value' }) ===>
+ *          [{name: '2/2', value: 2 }]
+ *          arrayFilterMap(data, [], {name: (item) => `${item.id}/${item.name}`, id: 'value' }) ===>
+ *          [{name: '1/1', value: 1 }, {name: '2/2', value: 2 }, {name: '3/3', value: 3 }, {name: '4/4', value: 4 }, {name: '5/5', value: 5 }]
+ */
+export const arrayFilterMap = <T extends any, U extends any>(
+  array: T[],
+  filter?: {
+    key?: string;
+    value: (string | number) | ((item: T) => boolean);
+    /** or或者、"also"并且, 默认also */
+    filterType?: "or" | "also";
+    /** equal等于、unEqual不等于, 默认等于equal */
+    equalType?: "equal" | "unEqual";
+  }[],
+  map?: Record<string, string | ((item: T) => any)>
+) => {
+  return array.reduce<U[]>((total, item) => {
+    let newItem = { ...(item as any) };
+    let bool = true;
+    if (!!filter?.length) {
+      filter?.forEach((filterItem) => {
+        const {
+          key: filterKey = "",
+          value: filterValue,
+          filterType = "also",
+          equalType = "equal",
+        } = filterItem;
+        let itemValue;
+        if (isFunction(filterValue)) {
+          itemValue = filterValue(newItem);
+        } else {
+          itemValue =
+            equalType === "equal"
+              ? newItem[filterKey] === filterValue
+              : newItem[filterKey] !== filterValue;
+        }
+        bool = filterType === "also" ? bool && itemValue : bool || itemValue;
+      });
+    }
+    if (bool) {
+      const keys = Object.keys(map ?? {}) as string[];
+      keys.forEach((keyItem) => {
+        const keyValue = map?.[keyItem] as string;
+        let finalValue = newItem[keyItem];
+        const isFunc = isFunction(keyValue);
+        if (isFunc) {
+          finalValue = keyValue(newItem);
+        } else {
+          delete newItem[keyItem];
+        }
+        const key = isFunc ? keyItem : keyValue;
+        newItem[key] = finalValue;
+      });
+      total.push(newItem as U);
+    }
+    return total;
+  }, []);
 };
