@@ -14,9 +14,9 @@ export const pickObjectField = <T, K = Record<string, any>>(
   const array = Array.isArray(pickStr) ? pickStr : pickStr.split(separator);
   return array.reduce((total, item) => {
     if (typeof total[item] === "number") {
-      return total[item];
+      return total?.[item];
     }
-    return total[item] || {};
+    return total?.[item];
   }, data) as unknown as T;
 };
 

@@ -8,6 +8,12 @@
     "module": "es6",
     "target": "es5",
     "jsx": "react",
+    "lib": [
+      "ES2015",
+      "ES2017",
+      "DOM"
+    ],
+    "downlevelIteration": true,
     // 允许编译javascript文件
     "allowJs": true,
     "moduleResolution": "node",

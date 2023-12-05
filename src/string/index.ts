@@ -33,12 +33,12 @@ export const uuid = (radix: number = 36): string => {
  * @param separator 字符串分隔符
  * @return ImgItem[] 图片数组
  * @example data = "https://1.png,https://2.png";
- * stringTransformImgArr(data) ===> [
+ * stringToImgArr(data) ===> [
  * { url: 'https://1.png', uid: 'xxx1', status: 'done' },
  * { url: 'https://2.png', uid: 'xxx2', status: 'done' },
  * ]
  */
-export const stringTransformImgArr = (
+export const stringToImgArr = (
   imgStr: string,
   separator: string = ","
 ): {

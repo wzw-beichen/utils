@@ -5,3 +5,4 @@ export * from "./object";
 export * from "./string";
 export * from "./common";
 export * from "./utils";
+export * from "./map";

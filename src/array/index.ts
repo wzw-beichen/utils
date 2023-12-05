@@ -32,30 +32,31 @@ export const arrayExchange = <T>(
  *  ===> convertToTree(data) => [{ parentId: 0, id: 1, name: '顶级组织', children: [{ parentId: 1, id: 2, name: '组织1', children: [{ parentId: 2, id: 3, name: '组织2' }]}]}]
  */
 export const convertToTree = <
-  T extends Record<string, any> & { children?: T[] }
+  T extends Record<string, any> & { children?: T[] },
+  K extends keyof T
 >(
   flatData: T[],
   config?: {
     parentId?: number;
-    idKey?: string;
-    parentKey?: string;
+    idKey?: K;
+    parentKey?: K;
     renderNode?: (data: T) => Record<string, any>;
   }
-) => {
+): T[] => {
   const {
     parentId,
     idKey = "id",
     renderNode,
     parentKey = "parentId",
   } = config || {};
-  const children = flatData.filter((node) => node[parentKey] === parentId);
+  const children = flatData.filter((node) => node[parentKey as K] === parentId);
   if (!children.length) {
     return [];
   }
   return children.map((node) => {
     const nodeChildren = convertToTree(flatData, {
       ...config,
-      parentId: node[idKey],
+      parentId: node[idKey as K],
     });
     if (nodeChildren.length) {
       node.children = nodeChildren;
@@ -77,21 +78,22 @@ export const convertToTree = <
  * @example const data = [{ parentId: 0, id: 1, name: '顶级组织', children: [{ parentId: 1, id: 2, name: '组织1', children: [{ parentId: 2, id: 3, name: '组织2' }]}]}, { parentId: 0, id: 1111, name: '顶级组织2',}]
  *  ===> arrayFlat(data) => [{ parentId: 0, id: 1, name: '顶级组织' }, { parentId: 1, id: 2, name: '组织1' }, { parentId: 2, id: 3, name: '组织2' }, { parentId: 0, id: 1111, name: '顶级组织2' }]
  */
-export const arrayFlat = <T extends Record<string, any> & { children?: T[] }>(
+export const arrayFlat = <
+  T extends Record<string, any> & { children?: T[] },
+  K extends keyof T
+>(
   flatData: T[],
   config?: {
-    childrenKey?: string;
+    childrenKey?: K;
   }
-): T[] => {
+): Omit<T, K>[] => {
   const { childrenKey = "children" } = config || {};
-  const newFlatData = flatData.reduce((total, item) => {
-    const children = item[childrenKey];
-    const otherKey = omitObjectSomeKeys(item, childrenKey);
-    return children?.length
-      ? [...total, otherKey, ...arrayFlat(children, config)]
-      : [...total, otherKey];
-  }, [] as T[]);
-  return newFlatData as T[];
+  return flatData.reduce((total, item) => {
+    const children = toArray(item[childrenKey as K]);
+    const otherKey = omitObjectSomeKeys(item, childrenKey as K);
+    const nodeChildren = children.length ? arrayFlat(children, config) : [];
+    return [...total, otherKey, ...nodeChildren];
+  }, [] as Omit<T, K>[]);
 };
 
 /**
@@ -104,20 +106,21 @@ export const arrayFlat = <T extends Record<string, any> & { children?: T[] }>(
  * @example const data = [{ parentId: 0, id: 1, name: '顶级组织' }, { parentId: 1, id: 2, name: '组织1' }, { parentId: 2, id: 3, name: '组织2' }, { parentId: 0, id: 1111, name: '顶级组织2' }]
  *  ===> arraySortKey(data, { order: 'descend' }) => [{ parentId: 0, id: 1111, name: '顶级组织2' }, { parentId: 2, id: 3, name: '组织2' }, { parentId: 1, id: 2, name: '组织1' }, { parentId: 0, id: 1, name: '顶级组织' }]
  */
-export const arraySortKey = <T extends Record<string, any>>(
+export const arraySortKey = <T extends Record<string, any>, K extends keyof T>(
   arrayData: T[],
   config?: {
-    sortKey?: string;
+    sortKey?: K;
     /** ascend升序 descend降序 */
     order?: "ascend" | "descend";
   }
 ): T[] => {
   const { sortKey = "id", order = "ascend" } = config || {};
+  const newSortKey = sortKey as K;
   return arrayData.sort((pre, cur) => {
     if (order === "descend") {
-      return cur[sortKey] - pre[sortKey];
+      return cur[newSortKey] - pre[newSortKey];
     }
-    return pre[sortKey] - cur[sortKey];
+    return pre[newSortKey] - cur[newSortKey];
   });
 };
 
@@ -248,22 +251,31 @@ export const toArray = <T>(value?: T | T[] | null) => {
 };
 
 /**
- * @description 常用图片数组转换成字符串。
- * @param imgArr 图片数组
- * @param separator 可选。要使用的分隔符。如果省略，元素用逗号分隔。
+ * @description 取数组某个字段的值用separator拼接成字符串。
+ * @param array 需要转为字符串的数组
+ * @param config 配置
  * @example data = [{ url: 'https://1.png' }, { url: 'https://2.png' }];
- * imgArrayTransformString(data) ===> 'https://1.png,https://2.png'
- * imgArrayTransformString(data, '%') ===> 'https://1.png%https://2.png'
+ * pickArrayKeyToString(data) ===> 'https://1.png,https://2.png'
+ * pickArrayKeyToString(data, '%') ===> 'https://1.png%https://2.png'
  */
-export const imgArrayTransformString = (
-  imgArr?: { url: string }[],
-  separator: string = ","
+export const pickArrayKeyToString = <
+  T extends Record<string, any>,
+  K extends keyof T
+>(
+  array?: T[],
+  config?: {
+    /** 取数组每一项的值 */
+    key?: K;
+    /** 可选。要使用的分隔符。如果省略，元素用逗号分隔。 */
+    separator?: string;
+  }
 ) => {
-  if (!imgArr?.length) {
+  const { key = "url", separator = "," } = config || {};
+  if (!array?.length) {
     return "";
   }
-  return imgArr
-    .map((item) => item.url)
+  return array
+    .map((item) => item[key as K])
     .filter(Boolean)
     .join(separator);
 };
@@ -589,4 +601,49 @@ export const arrayFilterMap = <T extends any, U extends any>(
     }
     return total;
   }, []);
+};
+
+/**
+ * Check if `namePath` is super set or equal of `subNamePath`.
+ * @param namePath A list of `InternalNamePath[]`
+ * @param subNamePath Compare `InternalNamePath`
+ * @param partialMatch True will make `[a, b]` match `[a, b, c]`
+ */
+export const matchNamePath = <T = string | number>(
+  /** `[a, b, c]` */
+  namePath: T[],
+  /** `[a, b]` */
+  subNamePath: T[],
+  /** `partialMatch`部分匹配 `true`部分匹配 `false`全匹配 */
+  partialMatch: boolean = false
+): boolean => {
+  if (!namePath || !subNamePath) {
+    return false;
+  }
+  if (!partialMatch && namePath.length !== subNamePath.length) {
+    return false;
+  }
+  return subNamePath.every((nameUnit, i) => namePath[i] === nameUnit);
+};
+
+/**
+ * Check if `namePathList` includes `namePath`.
+ * @param namePathList A list of `InternalNamePath[]`
+ * @param namePath Compare `InternalNamePath`
+ * @param partialMatch True will make `[a, b]` match `[a, b, c]`
+ * @returns boolean
+ * @explame
+ */
+export const containsNamePath = <T = string | number>(
+  /** 需要验证的二维数组 `[[a, b]]` */
+  namePathList: T[][],
+  /** 一维数组 `[a, b, c]` */
+  namePath: T[],
+  /** `partialMatch`部分匹配 `true`部分匹配 `false`全匹配 */
+  partialMatch = false
+): boolean => {
+  return (
+    !!namePathList &&
+    namePathList.some((path) => matchNamePath(namePath, path, partialMatch))
+  );
 };
