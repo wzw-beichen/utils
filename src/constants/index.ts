@@ -1,3 +1,5 @@
+export * from "./commonType";
+
 /** 常用日期格式话 */
 export const defaultDateFormat = {
   time: "YYYY-MM-DD HH:mm:ss",
