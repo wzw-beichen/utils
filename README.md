@@ -153,65 +153,67 @@ imgArrayTransformString(data, '%') ===> "https://1.png%https://2.png"
 ```
 const data = [
   {
-    id: 6,
     label: 6,
-    children: [{ id: 600, label: 600, children: [{ id: 60000, label: 6000 }] }],
+    value: 6,
+    children: [
+      { 
+        label: 60,
+        value: 60, 
+        children: [
+          { 
+            label: 600, 
+            value: 600 
+          },
+          { 
+            label: 601, 
+            value: 601 
+          }
+        ] 
+      },
+      {
+        label: 61,
+        value: 61
+      }
+    ],
   },
   {
-    id: 7,
     label: 7,
+    value: 7,
     children: [
-      { id: 700, label: 700, children: [{ id: 70000, label: 70000 }] },
+      { label: 70, value: 70, children: [{ label: 700, value: 700 }] },
     ],
   },
   {
-    id: 8,
     label: 8,
+    value: 8,
     children: [
-      { id: 800, label: 800, children: [{ id: 80000, label: 80000 }] },
+      { label: 80, value: 80, children: [{ label: 800, value: 800 }] },
     ],
-  },
-  {
-    id: 9,
-    label: 9,
-    children: [
-      { id: 900, label: 900, children: [{ id: 90000, label: 90000 }] },
-    ],
-  },
-  {
-    id: 10,
-    label: 10,
-    children: [
-      { id: 1000, label: 1000, children: [{ id: 100000, label: 100000 }] },
-    ],
-  },
+  }
 ];
-pickTreeArray(data, 8) ===> [
+pickTreeArray(data, 6) ===> [
   {
-    id: 8,
-    label: 8,
-    children: [
-      { id: 800, label: 800, children: [{ id: 80000, label: 80000 }] },
-    ],
+    label: 6,
+    value: 6,
   },
 ]
 
-pickTreeArray(data, 900) ===> [
+pickTreeArray(data, 60) ===> [
   {
-    id: 9,
-    label: 9,
+    label: 6,
+    value: 6,
     children: [
-      { id: 900, label: 900, children: [{ id: 90000, label: 90000 }] },
+      { label: 60, value: 60 },
     ],
   },
 ];
 
-pickTreeArray(data, 100000) ===> [
+pickTreeArray(data, 600) ===> [
   {
-    id: 10,
-    label: 10,
+    label: 6,
+    value: 6,
     children: [
-      { id: 1000, label: 1000, children: [{ id: 100000, label: 100000 }] },
+      { label: 60, value: 60, children: [{ label: 600, value: 600 }] },
     ],
   },
 ];
@@ -221,79 +223,29 @@ pickTreeArray(data, 100000) ===> [
 ```
 const data = [
   {
-    id: 8,
     label: 8,
+    value: 8,
     children: [
-      { id: 800, label: 800, children: [{ id: 80000, label: 80000 }] },
+      { label: 800, value: 800, children: [{ label: 80000, value: 80000 }] },
     ],
   },
 ];
-pickLevelTreeArray(data, 8) ===> [{ id: 8, label: 8 }];
+pickLevelTreeArray(data, 8) ===> [{ label: 8, value: 8 }];
 
 pickLevelTreeArray(data, 800) ===> [
-  { id: 8, label: 8 },
-  { id: 800, label: 800 },
+  { label: 8, value: 8 },
+  { label: 800, value: 800 },
 ];
 
 pickLevelTreeArray(data, 80000) ===> [
-  { id: 8, label: 8 },
-  { id: 800, label: 800 },
-  { id: 80000, label: 80000 },
+  { label: 8, value: 8 },
+  { label: 800, value: 800 },
+  { label: 80000, value: 80000 },
 ];
+
+pickLevelTreeArray(data, 800, { callback: (item) => item.value }) ===> [8, 800];
 ```  
-#### 13.pickLabelValueTreeArray
-描述：根据targetId获取树形数组的某一项，铺平获取到的某一项数据
-```
-const data = [
-  {
-    id: 6,
-    label: 6,
-    children: [{ id: 600, label: 600, children: [{ id: 60000, label: 6000 }] }],
-  },
-  {
-    id: 7,
-    label: 7,
-    children: [
-      { id: 700, label: 700, children: [{ id: 70000, label: 70000 }] },
-    ],
-  },
-  {
-    id: 8,
-    label: 8,
-    children: [
-      { id: 800, label: 800, children: [{ id: 80000, label: 80000 }] },
-    ],
-  },
-  {
-    id: 9,
-    label: 9,
-    children: [
-      { id: 900, label: 900, children: [{ id: 90000, label: 90000 }] },
-    ],
-  },
-  {
-    id: 10,
-    label: 10,
-    children: [
-      { id: 1000, label: 1000, children: [{ id: 100000, label: 100000 }] },
-    ],
-  },
-];
-pickLabelValueTreeArray(data, 8) ===> [{ id: 8, label: 8 }];
-
-pickLabelValueTreeArray(data, 800) ===> [
-  { id: 8, label: 8 },
-  { id: 800, label: 800 },
-];
-
-pickLabelValueTreeArray(data, 80000) ===> [
-  { id: 8, label: 8 },
-  { id: 800, label: 800 },
-  { id: 80000, label: 80000 },
-];
-```  
-
-#### 14.arrayCombination
+#### 13.arrayCombination
 描述：数组根据对应某个key进行组合
 ```
 const data = [{ uuid: "xxx1", id: 1, name: 111 }, { uuid: "xxx2", id: 1, name: 222 }, { uuid: "xxx3", id: 2, name: 333 }];
@@ -306,7 +258,7 @@ arrayCombination(data, { key: "id", returnArray: true }) ===>  [
   ["2", [{ uuid: "xxx3", id: 2, name: 333 }]
 ]
 ```  
-#### 15.differenceBy
+#### 14.differenceBy
 描述：取两个数组分别对应的交集、并集
 ```
 const data = [
@@ -321,7 +273,7 @@ differenceBy(data, [1, 2], item => item.value) ===> [
   [1, 2]
 ]
 ```  
-#### 16.arrayIntersectionAndUnion
+#### 15.arrayIntersectionAndUnion
 描述：取两个数组分别对应的交集、并集
 ```
 const initParams = [
@@ -345,7 +297,7 @@ arrayIntersectionAndUnion(formData, initParams, (item) => item.value) ===> [
   [1],
 ]
 ```
-#### 17.arrayFilterMap
+#### 16.arrayFilterMap
 描述：取两个数组分别对应的交集、并集
 ```
 const data = [{ id: 1, name: 1 }, { id: 2, name: 2 }, { id: 3, name: 3 }, { id: 4, name: 4 }, { id: 5, name: 5 }];
@@ -369,6 +321,43 @@ arrayFilterMap(data, [{ value: (item) => item.name === 2 }], { name: (item) => `
 
 arrayFilterMap(data, [], { name: (item) => `${item.id}/${item.name}`, id: 'value' }) ===>
 [{ name: '1/1', value: 1 }, { name: '2/2', value: 2 }, { name: '3/3', value: 3 }, { name: '4/4', value: 4 }, { name: '5/5', value: 5 }]
+```
+#### 17.treeArrayOrderProperty
+描述：树形数组增加层级结构属性，层级结构属性默认order
+```
+const data = [{ 
+  label: 1,
+  value: 1, 
+  children: [
+    { label: 11, value: 11 },
+    { label: 12, value: 12 }
+  ]
+}]
+treeArrayOrderProperty(data) ===>
+[
+  { 
+    label: 1, 
+    value: 1, 
+    order: "1", 
+    children: [
+      { label: 11, value: 11, order: "1-1" }, 
+      { label: 12, value: 12, order: "1-2" }
+    ]
+  }
+]
+
+treeArrayOrderProperty(data, "*") ===>
+[
+  { 
+    label: 1, 
+    value: 1, 
+    order: "*-1", 
+    children: [
+      { label: 11, value: 11, order: "*-1-1" }, 
+      { label: 12, value: 12, order: "*-1-2" }
+    ]
+  }
+]
 ```
 
 ## Enum
