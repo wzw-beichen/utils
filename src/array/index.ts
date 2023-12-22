@@ -386,7 +386,7 @@ export const pickLevelTreeArray = <T>(
       total.push(newItem);
     }
     if (children) {
-      const pickArr = pickLevelTreeArray(children, targetId, fieldNames);
+      const pickArr = pickLevelTreeArray(children, targetId, fieldNames) as T[];
       if (pickArr?.length) {
         return [...total, newItem, ...pickArr];
       }
