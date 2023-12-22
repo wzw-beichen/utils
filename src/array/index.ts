@@ -361,10 +361,10 @@ export const pickLevelTreeArray = <T>(
     children?: string;
     callback?: (item: T) => unknown;
   }
-): T[] => {
+): T[] | string | number => {
   const {
-    value: valueKey = "label",
-    label: labelKey = "value",
+    label: labelKey = "label",
+    value: valueKey = "value",
     children: childrenKey = "children",
     callback,
   } = fieldNames || {};
@@ -387,7 +387,9 @@ export const pickLevelTreeArray = <T>(
     }
     if (children) {
       const pickArr = pickLevelTreeArray(children, targetId, fieldNames);
-      return [...total, newItem, ...pickArr];
+      if (pickArr?.length) {
+        return [...total, newItem, ...pickArr];
+      }
     }
     return total;
   }, []);
