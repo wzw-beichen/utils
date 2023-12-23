@@ -8,12 +8,12 @@
  */
 export const pickObjectField = <T, K = Record<string, any>>(
   data: K,
-  pickStr: string | string[],
+  pickStr: string | (string | number)[],
   separator = "."
 ): T => {
   const array = Array.isArray(pickStr) ? pickStr : pickStr.split(separator);
   return array.reduce((total, item) => {
-    if (typeof total[item] === "number") {
+    if (typeof total?.[item] === "number") {
       return total?.[item];
     }
     return total?.[item];
