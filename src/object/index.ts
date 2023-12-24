@@ -1,3 +1,5 @@
+import { toArray } from "../array";
+
 /**
  * @description 取对象对应字段
  * @param data Record<string, any> 对象数据
@@ -13,10 +15,11 @@ export const pickObjectField = <T, K = Record<string, any>>(
 ): T => {
   const array = Array.isArray(pickStr) ? pickStr : pickStr.split(separator);
   return array.reduce((total, item) => {
-    if (typeof total?.[item] === "number") {
-      return total?.[item];
+    const value = total?.[item];
+    if (typeof value === "number") {
+      return value;
     }
-    return total?.[item];
+    return value;
   }, data) as unknown as T;
 };
 
@@ -69,7 +72,7 @@ export const omitObjectSomeKeys = <
   obj: T,
   omitKeys: K[] | K
 ): Omit<T, K> => {
-  const newOmitKeys = Array.isArray(omitKeys) ? omitKeys : [omitKeys];
+  const newOmitKeys = toArray(omitKeys);
   const omitObj = Object.keys(obj).reduce((total, keyItem) => {
     if (!newOmitKeys.includes(keyItem as K)) {
       total[keyItem] = obj[keyItem];
@@ -77,4 +80,29 @@ export const omitObjectSomeKeys = <
     return total;
   }, {} as Omit<T, K>);
   return omitObj;
+};
+
+/**
+ * @description 动态取对象中的属性
+ * @param obj Record<string, any> 目标对象
+ * @param pickKeys string[] | string 取对象的key值
+ * @returns 取key值的对象
+ * @example const data = { a: 1, b: 2, c: 3, d: 4 } ===> pickObjectSomeKeys(data, 'a') => { a: 1 }
+ * @example const data = { a: 1, b: 2, c: 3, d: 4 } ===> pickObjectSomeKeys(data, ['a', 'b']) => { a: 1, b: 2 }
+ */
+export const pickObjectSomeKeys = <
+  T extends Record<string, any>,
+  K extends keyof T
+>(
+  obj: T,
+  pickKeys: K[] | K
+): Pick<T, K> => {
+  const newPickKeys = toArray(pickKeys);
+  const pickObj = Object.keys(obj).reduce((total, keyItem) => {
+    if (newPickKeys.includes(keyItem as K)) {
+      total[keyItem] = obj[keyItem];
+    }
+    return total;
+  }, {} as Pick<T, K>);
+  return pickObj;
 };

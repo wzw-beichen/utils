@@ -1,4 +1,5 @@
 import { isPlainObject } from "../object";
+
 type EventArgs = any[];
 
 /**
