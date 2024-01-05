@@ -1,4 +1,9 @@
 import { toArray } from "../array";
+export * from "./get";
+export * from "./getKeys";
+export * from "./isObject";
+export * from "./set";
+export * from "./merge";
 
 /**
  * @description 取对象对应字段
